@@ -28,7 +28,7 @@ solveWrite seznamLoginu cf2 f3 = do
 --   print slnew
   solveWrite slnew cf2 f3
   
- 
+-- VYPIS na obrazovku 
 solveCompare2 x []= putStr ("\n")
 solveCompare2 x (y:ys) = if check   then do nahrad
 					    solveCompare2 x ys
@@ -40,7 +40,7 @@ solveCompare2 x (y:ys) = if check   then do nahrad
 
   
   
-  
+-- VYPIS na do souboru  
 -- solveCompare :: Char -> [Char] -> IO ()
 solveCompare x [] f3 = hPutStr f3 "\n"
 solveCompare x (y:ys) f3 =if check   then do nahrad
