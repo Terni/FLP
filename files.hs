@@ -21,11 +21,8 @@ solveWrite [] _ f3 = return ()
 solveWrite seznamLoginu cf2 f3 = do
   let seznamSlov = words cf2
 --   print seznamSlov
---   putStr 
 --   print seznamLoginu
   let onelogin = concat $ take 1 seznamLoginu
---   let oneWord = concat $ take 1 seznamSlov
---   (==) onelogin oneWord
   solveCompare onelogin seznamSlov f3
   let slnew = drop 1 seznamLoginu
 --   print slnew
@@ -45,7 +42,6 @@ solveCompare2 x (y:ys) = if check   then do nahrad
   
   
 -- solveCompare :: Char -> [Char] -> IO ()
--- solveCompare x [] = putStr (x ++ " ")
 solveCompare x [] f3 = hPutStr f3 "\n"
 solveCompare x (y:ys) f3 =if check   then do nahrad
 					     solveCompare x ys f3
@@ -56,7 +52,7 @@ solveCompare x (y:ys) f3 =if check   then do nahrad
       nahrad = hPutStr f3 (x ++ " ")
 
       
-      
+-- TEST      
 -- solveS (x:xs) = show (x ++ "\n") : solveS xs
  
 		
