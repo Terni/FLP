@@ -1,7 +1,14 @@
 import IO
 
--- main = file_abc test test2
 
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------- 
+------------------------------------RADNA 2012 ------------------------------------------- 
+-----------------------------------------------------------------------------------------------------------
 -- pouziti: logins "xlogin" "text" "text2"
 logins file1 file2 file3 = do
 		f1 <- openFile file1 ReadMode
@@ -28,20 +35,8 @@ solveWrite seznamLoginu cf2 f3 = do
 --   print slnew
   solveWrite slnew cf2 f3
   
--- VYPIS na obrazovku 
-solveCompare2 x []= putStr ("\n")
-solveCompare2 x (y:ys) = if check   then do nahrad
-					    solveCompare2 x ys
-				     else do putStr (y ++ " ")
-					     solveCompare2 x ys
-    where
-      check = (==) "xzzzzz99" y
-      nahrad = putStr (x ++ " ")  
-
-  
-  
 -- VYPIS na do souboru  
--- solveCompare :: Char -> [Char] -> IO ()
+solveCompare :: [Char] -> [[Char]] -> Handle -> IO ()
 solveCompare x [] f3 = hPutStr f3 "\n"
 solveCompare x (y:ys) f3 =if check   then do nahrad
 					     solveCompare x ys f3
@@ -51,22 +46,74 @@ solveCompare x (y:ys) f3 =if check   then do nahrad
       check = (==) "xzzzzz99" y
       nahrad = hPutStr f3 (x ++ " ")
 
+-- VYPIS na obrazovku 
+{-solveCompare2 x []= putStr ("\n")
+solveCompare2 x (y:ys) = if check   then do nahrad
+					    solveCompare2 x ys
+				     else do putStr (y ++ " ")
+					     solveCompare2 x ys
+    where
+      check = (==) "xzzzzz99" y
+      nahrad = putStr (x ++ " ")   -}     
+      
+      
       
 -- TEST      
 -- solveS (x:xs) = show (x ++ "\n") : solveS xs
  
-		
+----------------------------------------------------------------------------------------------------------- 
+------------------------------------RADNA 2011 ------------------------------------------- 
+----------------------------------------------------------------------------------------------------------- 
 
+-- RADNA 2011 my 
+-- pouziti: checkContents "test" "test2" 
+checkContents fi fo = do
+  f1 <- openFile fi ReadMode
+  f2 <- openFile fo WriteMode
+  cf1 <- hGetContents f1
+  let (stav, pozice) = solveCheck cf1
+--   let poziceR = snd (stav, pozice)
+  if stav then do hPutStr f2 (show pozice)
+	  else do putStr "Error\n" 
+-- 		  hPutStr f2 (show pozice)
+		  putStrLn (show pozice)
+  hClose f1
+  hClose f2
+
+
+solveCheck cf
+  | ((==) lenA lenB) && ((==) lenB lenC) && ((==) 0 (length zbytek3)) = (True,poz)
+  | True = (False, pozErr)
+  where
+    -- delka pro C
+    lenA = length $ fst $ span (== 'a') cf
+    zbytek = snd $ span (== 'a') cf
+    -- delka pro B
+    lenB = length $ fst $ span (== 'b') zbytek
+    zbytek2 = snd $ span (== 'b') zbytek
+    -- delka pro C
+    lenC = length $ fst $ span (== 'c') zbytek2
+    zbytek3 = snd $ span (== 'c') zbytek2
+    -- zjisteni pozice
+
+    poz = lenA
+    pozErr = if ((/=) lenA poz) then 1 else if ((/=) lenB poz) then poz+1 else if ((/=) lenC poz) then (poz*3)+1 else (poz*2)+1 
+ 
+
+
+----------------------------------------------------------------------------------------------------------- 
+-- pouziti: file_abc "test" "test2"
 file_abc fi fo = do
 		  handle_in <- openFile fi ReadMode
 		  hadnle_out <- openFile fo WriteMode
 		  content_filesIN <- hGetContents handle_in
-		  -- Zkontrolovani posctu A^n B^n B^n
+		  -- Zkontrolovani posctu A^n B^n C^n
 		  let (res,val) = solveVyrazABC content_filesIN
 		  -- zapis do souboru
-		  hPutStr hadnle_out (show val)
+-- 		  hPutStr hadnle_out (show val)
+		  putStrLn (show val)
 		  if res then return () 
-			 else hPutStr stderr "Error"
+			 else hPutStr stderr "Error\n"
 		  hClose hadnle_out
 		  hClose handle_in
   
@@ -88,7 +135,76 @@ solveVyrazABC l
       | las==lbs = if lcs>las then las+las+las+1 else las+las+lcs+1
       | True = if lbs>las then las+las+1 else las+lbs+1
       
+----------------------------------------------------------------------------------------------------------- 
+------------------------------------OPRAVKA 2011 ------------------------------------------- 
+-----------------------------------------------------------------------------------------------------------
 
+-- OPRAVKA 2011 my
+wraps n fi fo = do
+  f1 <- openFile fi ReadMode
+  f2 <- openFile fo WriteMode
+  cf1 <- hGetContents f1
+  let seznamSlov = words cf1
+--   print seznamSlov
+  let pocatecniDelka = 0
+  solveWraps n seznamSlov pocatecniDelka f2 
+  hClose f1
+  hClose f2
+
+solveWraps n [] vs f2  = return ()
+solveWraps 0 (x:xs) 0 f2 = do
+  hPutStr f2 x
+  solveWraps 0 xs 0 f2
+  
+solveWraps n (x:xs) vs f2  = do
+  if check 
+    then do hPutStr f2 (x ++ " ")
+	    putStr (x ++ " ")
+	    solveWraps n xs vsdelka f2 
+    else do hPutStrLn f2 x
+	    putStrLn x
+	    solveWraps n xs 0 f2
+  where
+      vsdelka = (+) (length x) vs
+      check = (<=) vsdelka n
+
+
+-----------------------------------------------------------------------------------------------------------
+
+shrink n fi fo = do
+	hi <- openFile fi ReadMode
+	ho <- openFile fo WriteMode
+	cont <- hGetContents hi
+	hPutStr ho $ unlines $ concat $ map (shrinkP n) $ par $ lines cont
+	hClose ho
+	hClose hi
+ 
+par ls
+	| null rst = [concat p1]
+	| null p1 = [concat nosp]
+	| True = concat p1 : par rst
+	where
+		nosp = dropWhile (== []) ls
+		(p1, rest) = span (/= []) nosp
+		rst = dropWhile (== []) rest
+ 
+shrinkP _ [] = []
+shrinkP width cs
+	| null wds = [cs, ""]
+	| True = join (head wds) (tail wds)
+	where
+		wds = words cs
+		join l (w:ws)
+			| length l + 1 + length w > width = l : join w ws
+			| True = join (l ++ (' ':w)) ws
+		join l [] = [l, ""]
+
+
+
+      
+----------------------------------------------------------------------------------------------------------- 
+------------------------------------ RUZNE OSTATNI ------------------------------------------- 
+-----------------------------------------------------------------------------------------------------------
 {-
 -- Jen pro pripomenuti:
 data IOMode =  ReadMode | WriteMode | AppendMode | ReadWriteMode
