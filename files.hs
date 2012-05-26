@@ -75,8 +75,8 @@ checkContents fi fo = do
 --   let poziceR = snd (stav, pozice)
   if stav then do hPutStr f2 (show pozice)
 	  else do putStr "Error\n" 
--- 		  hPutStr f2 (show pozice)
-		  putStrLn (show pozice)
+		  hPutStr f2 (show pozice)
+-- 		  putStrLn (show pozice)
   hClose f1
   hClose f2
 
@@ -110,8 +110,8 @@ file_abc fi fo = do
 		  -- Zkontrolovani posctu A^n B^n C^n
 		  let (res,val) = solveVyrazABC content_filesIN
 		  -- zapis do souboru
--- 		  hPutStr hadnle_out (show val)
-		  putStrLn (show val)
+		  hPutStr hadnle_out (show val)
+-- 		  putStrLn (show val)
 		  if res then return () 
 			 else hPutStr stderr "Error\n"
 		  hClose hadnle_out
