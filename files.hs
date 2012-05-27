@@ -9,7 +9,55 @@ import IO
 ----------------------------------------------------------------------------------------------------------- 
 ------------------------------------RADNA 2012 ------------------------------------------- 
 -----------------------------------------------------------------------------------------------------------
--- pouziti: logins "xlogin" "text" "text2"
+filllogins :: FilePath -> FilePath -> FilePath -> IO ()
+filllogins log txt res = do
+  logH <- openFile log ReadMode -- Handlery souboru
+  txtH <- openFile txt ReadMode -- pro cteni
+  resH <- openFile res WriteMode -- a pro zapis
+  logC <- hGetContents logH -- Nacteni obsahu souboru s loginy
+  txtC <- hGetContents txtH -- Nacteni obsahu sablony
+  hPutStr resH $ unlines $ map (subs txtC) (lines logC) -- Nahrazeni loginu, unline, zapis
+  hClose logH -- Close
+  hClose txtH -- all the
+  hClose resH -- files
+  where
+      subs [] _ = [] -- Kdyz neni co nahrazovat tak konec
+      subs line@(x:xs) login = if take 8 line == "xzzzzz99" -- Kdyz retezec zacina "xzzzzz99"...
+				    then login ++ subs (drop 8 line) login -- Tak ho nahradime za login a rekurzime zbytek retezce
+				    else x:subs xs login -- Jinak preskocime jeden znak a rekurzime zbytek retezce
+
+-----------------------------------------------------------------------------------------------------------
+io :: FilePath -> FilePath -> FilePath -> IO()
+io f1 f2 f3 = do
+  f1h <- openFile f1 ReadMode
+  f1c <- hGetContents f1h
+  f2h <- openFile f2 ReadMode
+  f2c <- hGetContents f2h
+  f3h <- openFile f3 WriteMode
+  let st = substitute (lines f1c) (lines f2c)
+  hPutStr f3h (unlines st)
+  hClose f1h
+  hClose f2h
+  hClose f3h
+ 
+substitute :: [String] -> [String] -> [String]
+substitute [] _ = []
+substitute (x:xs) text = (unlines $ subs x text) : substitute xs text
+ 
+subs :: String -> [String] -> [String]
+subs _ [] = []
+subs login (x:xs) = subs' login x:subs login xs
+ 
+subs' :: String -> String -> String
+subs' _ [] = []
+subs' login@(a':b':c':d':e':f':g':h':[]) (a:b:c:d:e:f:g:h:xs) = if a=='x' && b=='z' && c=='z' && d=='z' && e=='z' && f=='z' && g=='9' && h=='9'
+                                   then a':b':c':d':e':f':g':h':subs' login xs
+                                   else a:subs' login (b:c:d:e:f:g:h:xs)
+subs' login (x:xs) = x:subs' login xs
+
+------------------------------------------------ Ne uplne kotretni verze (nize)----------------------------------------------------------- 
+ 
+ -- pouziti: logins "xlogin" "text" "text2"
 logins file1 file2 file3 = do
 		f1 <- openFile file1 ReadMode
 		f2 <- openFile file2 ReadMode
@@ -60,6 +108,67 @@ solveCompare2 x (y:ys) = if check   then do nahrad
       
 -- TEST      
 -- solveS (x:xs) = show (x ++ "\n") : solveS xs
+-----------------------------------------------------------------------------------------------------------
+-- pouziti: logins "xlogin" "text" "text2"
+logins2 :: FilePath -> FilePath -> FilePath -> IO ()
+logins2 file1 file2 file3 = do
+		f1 <- openFile file1 ReadMode
+		f2 <- openFile file2 ReadMode
+		f3 <- openFile file3 WriteMode
+		cf1 <- hGetContents f1
+		cf2 <- hGetContents f2
+		let seznamLoginu = words cf1
+		solveWrite2 seznamLoginu cf2 f3
+		hClose f1
+		hClose f2
+		hClose f3
+		
+solveWrite2 :: [[Char]] -> String -> Handle -> IO ()
+solveWrite2 [] _ f3 = return () 
+solveWrite2 seznamLoginu cf2 f3 = do
+    let onelogin = concat $ take 1 seznamLoginu
+    hPutStrLn f3 (solveCompareZnak2Znak onelogin cf2)
+--     putStrLn (solveCompareZnak2Znak onelogin cf2)
+    solveWrite2 (drop 1 seznamLoginu) cf2 f3
+
+solveCompareZnak2Znak _ [] = []    
+solveCompareZnak2Znak onelogin z@(x:xs) =  if (compText "xzzzzz99" z) 
+					    then onelogin ++ (solveCompareZnak2Znak onelogin (drop 8 z))
+					    else x : solveCompareZnak2Znak onelogin xs
+-- 		
+compText :: [Char] -> [Char] -> Bool
+compText [] _ = True
+compText (x:xs) (y:ys) = (x == y) && compText xs ys
+compText _ _ = False 
+----------------------------------------------------------------------------------------------------------- 
+-- pouziti: gen "xlogin" "text" "text2"
+gen :: FilePath -> FilePath -> FilePath -> IO ()
+gen log txt res = do
+		  logH <- openFile log ReadMode
+		  txtH <- openFile txt ReadMode
+		  resH <- openFile res WriteMode
+		  logC <- hGetContents logH
+		  txtC <- hGetContents txtH
+		  --
+		  hPutStr resH $ mkCont (lines logC) txtC
+		  hClose resH
+		  hClose txtH
+		  hClose logH
+
+mkCont [] _ = []
+mkCont (l:ls) tx = modif l tx $ mkCont ls tx
+
+modif _ [] app = app
+modif l b@(c:cs) app =
+		    if lEq "xzzzzz99" b
+		    then l ++ modif l (drop 8 b) app
+		    else c : modif l cs app
+		       
+lEq [] _ = True
+lEq (x:xs) (y:ys) = x==y && lEq xs ys
+lEq _ _ = False
+
+
  
 ----------------------------------------------------------------------------------------------------------- 
 ------------------------------------RADNA 2011 ------------------------------------------- 
